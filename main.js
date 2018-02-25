@@ -39,7 +39,7 @@ function verify () {
   attempt(() => {
     var allTweetNodes = document.querySelectorAll('.FullNameGroup'), i
     for (i = 0; i < allTweetNodes.length; ++i) {
-      if(allTweetNodes[i].querySelector('.fullname').innerHTML === myFullname) {
+      if(allTweetNodes[i].querySelector('.fullname').textContent === myFullname) {
         if (allTweetNodes[i].querySelector('.UserBadges').children.length === 0) {
           allTweetNodes[i].querySelector('.UserBadges').appendChild(userBadgeNode.cloneNode(true))
         }
@@ -79,62 +79,62 @@ $(function () {
   var createObserver = function (obj, args, callback) {
     const obs = new MutationObserver(function(mutations, observer){
       if(mutations[0].addedNodes.length || mutations[0].removedNodes.length) {
-        callback();
+        callback()
       }
-    });
+    })
     obs.observe(obj, {
       childList: args[0],  // children
       subtree: args[1]     // descendents
-    });
-    obj.addEventListener('DOMNodeInserted', callback, false);
-    obj.addEventListener('DOMNodeRemoved', callback, false);
-    return obs;
-  };
+    })
+    obj.addEventListener('DOMNodeInserted', callback, false)
+    obj.addEventListener('DOMNodeRemoved', callback, false)
+    return obs
+  }
 
   // Track the number of attempts
-  var attempts = 0;
+  var attempts = 0
 
-  var timelineNode = document.querySelector('.stream-items');
-  var prevLength = timelineNode.children.length;
+  var timelineNode = document.querySelector('.stream-items')
+  var prevLength = timelineNode.children.length
 
   var timelineObserver = {}
   var bodyObserver = {}
 
   // Attempt to do something
   var attemptToVerify = function () {
-    ++attempts;
+    ++attempts
 
     try {
       if (timelineNode) {
-        console.log('%cverify-me %cVerifying your stuff... mounting observer', 'color: #1dcaff', 'color: #9CAFBE');
-        verify();
+        console.log('%cverify-me %cVerifying your stuff... mounting observer', 'color: #1dcaff', 'color: #9CAFBE')
+        verify()
       }
       var timelineObserver = createObserver(timelineNode, [true, false], function () {
-        if (++attempts > 500) throw new Error('something went wrong')
-        console.log('%cverify-me %cMore tweets loaded into the timeline, verifying you on those...', 'color: #1dcaff', 'color: #9CAFBE');
-        verify();
-      });
+        ++attempts
+        console.log('%cverify-me %cMore tweets loaded into the timeline, verifying you on those...', 'color: #1dcaff', 'color: #9CAFBE')
+        verify()
+      })
     } catch (e) {
-      verify();
-      console.log(`%cverify-me %cUnable to find your timeline DOM node, trying again in ${RETRY_TIMING / 1000} seconds...`, 'color: #1dcaff', 'color: #9CAFBE');
+      verify()
+      console.log(`%cverify-me %cUnable to find your timeline DOM node, trying again in ${RETRY_TIMING / 1000} seconds...`, 'color: #1dcaff', 'color: #9CAFBE')
       setTimeout(() => {
         if (attempts < ERROR_BUFFER) {
-          attemptToVerify();
+          attemptToVerify()
         } else {
-          console.log(`%cverify-me %cUnable to find your timeline DOM node ${ERROR_BUFFER} times, giving up.`, 'color: #1dcaff', 'color: #9CAFBE');
+          console.log(`%cverify-me %cUnable to find your timeline DOM node ${ERROR_BUFFER} times, giving up.`, 'color: #1dcaff', 'color: #9CAFBE')
         }
-      }, RETRY_TIMING);
+      }, RETRY_TIMING)
     }
   }
 
-  attemptToVerify();
+  attemptToVerify()
 
   var prevBodyUpdate = Date.now()
   var bodyObserver = createObserver(document.querySelector('body'), [true, true], function () {
     if ((Date.now() - prevBodyUpdate) / 1000 > 1) {
-      console.log('%cverify-me %cNoticed you changed pages, remounting observers', 'color: #1dcaff', 'color: #9CAFBE');
+      console.log('%cverify-me %cNoticed you changed pages, remounting observers', 'color: #1dcaff', 'color: #9CAFBE')
       prevBodyUpdate = Date.now()
-      attemptToVerify();
+      attemptToVerify()
     }
   })
-});
+})
